@@ -1,0 +1,24 @@
+[
+    {
+        "id": "chr1",
+        "description": "chr1 Homo sapiens chromosome 1, GRCh38.p14 Primary Assembly",
+        "sequence_length": 120,
+        "total_chunks": 3,
+        "chunks": [
+            "ATGCGTGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCAT",
+            "GCATGCATGCATGCGTGCATGCATGCATGCATGCATGCATGCATGCATGC",
+            "ATGCATGCATGCATGCATGC"
+        ]
+    },
+    {
+        "id": "chr2",
+        "description": "chr2 Homo sapiens chromosome 2, GRCh38.p14 Primary Assembly",
+        "sequence_length": 120,
+        "total_chunks": 3,
+        "chunks": [
+            "CGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACG",
+            "TACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTA",
+            "CGTACGTACGTACGTACGTA"
+        ]
+    }
+]
