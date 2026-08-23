@@ -38,10 +38,7 @@ NUC_BIT_MAP[ord('T')] = 0b11
 
 BIT_TO_NUC = {0b00: 'A', 0b01: 'C', 0b10: 'G', 0b11: 'T'}
 
-
-# ====================================================================
 # System Diagnostic & Utility Functions
-# ====================================================================
 def get_process_memory_mb() -> float:
     """Returns current process Resident Set Size (RSS) memory in MB."""
     process = psutil.Process(os.getpid())
