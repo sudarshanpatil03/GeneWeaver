@@ -76,9 +76,7 @@ def generate_synthetic_dna(length: int) -> str:
     return "".join(np.random.choice(bases, size=length))
 
 
-# ====================================================================
 # Bit-Packing Utilities (4x Compression Ratio)
-# ====================================================================
 def pack_dna_sequence(dna_str: str) -> np.ndarray:
     """Packs ASCII DNA text into a 2-bit uint8 NumPy array (4 bases per byte)."""
     ascii_bytes = np.frombuffer(dna_str.upper().encode('ascii'), dtype=np.uint8)
