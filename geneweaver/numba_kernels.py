@@ -214,3 +214,63 @@ def benchmark_vs_numpy(
         "numpy_ms": round(numpy_ms, 3),
         "speedup": round(speedup, 2),
     }
+
+# ---------------------------------------------------------------------------
+# Heavy workload kernel (Dummy workload for scaling benchmark)
+# ---------------------------------------------------------------------------
+
+if _NUMBA_OK:
+    @cuda.jit
+    def _kernel_heavy_compute(arr, iterations):
+        """CUDA kernel: repeatedly multiply and add to simulate heavy load."""
+        i = cuda.grid(1)
+        if i < arr.shape[0]:
+            val = arr[i]
+            for _ in range(iterations):
+                val = (val * 1.01) + 0.01
+                if val > 1000.0:
+                    val = val / 1000.0
+            arr[i] = val
+
+def run_heavy_workload(chunk_array: np.ndarray, iterations: int = 10000, *, device_id: int = 0) -> np.ndarray:
+    """
+    Runs a heavy dummy workload on the GPU for the given sequence array.
+
+    Parameters
+    ----------
+    chunk_array : np.ndarray – 1-D float32 array.
+    iterations  : int – Number of dummy iterations per element.
+    device_id   : int – CUDA device index (default 0).
+
+    Returns
+    -------
+    np.ndarray (float32)
+    """
+    arr = np.asarray(chunk_array, dtype=np.float32)
+    
+    try:
+        _ensure_device(device_id)
+        n = arr.shape[0]
+        threads = 256
+        blocks = math.ceil(n / threads)
+
+        d_arr = cuda.to_device(arr)
+        _kernel_heavy_compute[blocks, threads](d_arr, iterations)
+        cuda.synchronize()
+        return d_arr.copy_to_host()
+    except Exception as e:
+        # Fallback to CPU if NVVM or CUDA is not fully installed
+        import numba
+        
+        @numba.njit(nogil=True)
+        def _cpu_heavy_compute(arr_in, iters):
+            for i in range(arr_in.shape[0]):
+                val = arr_in[i]
+                for _ in range(iters):
+                    val = (val * 1.01) + 0.01
+                    if val > 1000.0:
+                        val = val / 1000.0
+                arr_in[i] = val
+        
+        _cpu_heavy_compute(arr, iterations)
+        return arr
