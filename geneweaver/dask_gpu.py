@@ -107,13 +107,11 @@ def make_gpu_cluster(n_gpus: int = 1, **kwargs) -> LocalCluster:
             "Falling back to LocalCluster with CUDA_VISIBLE_DEVICES per worker."
         )
         # Build per-worker env: worker 0 → GPU 0, worker 1 → GPU 1, …
-        worker_kwargs = {
-            "env": {"CUDA_VISIBLE_DEVICES": str(i % n_gpus)}
-        }
+        import os
+        os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(str(x) for x in range(n_gpus))
         cluster = LocalCluster(
             n_workers=n_gpus,
             threads_per_worker=1,
-            worker_kwargs=worker_kwargs,
             dashboard_address="localhost:8787",
             **kwargs,
         )
