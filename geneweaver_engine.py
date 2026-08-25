@@ -102,9 +102,6 @@ def unpack_2bit_window(packed_arr: np.ndarray, byte_idx: int, nucleotide_len: in
         bit_val = (packed_arr[b_idx] >> shift) & 0b11
         chars.append(BIT_TO_NUC[bit_val])
     return ''.join(chars)
-
-
-# =======================================================================
 # 1. CPU Alignment Algorithms (Baseline Implementations
 # =======================================================================
 def run_brute_force_matcher(genome: str, query: str, max_mismatches: int) -> List[Tuple[int, int]]:
