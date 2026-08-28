@@ -161,9 +161,6 @@ def run_smith_waterman_scores(
         curr_row = [0] * (m + 1)
         
     return high_scoring_sites
-
-
-# ========================================================================
 # 2. CUDA Kernel Engine (Parallel Bitwise Off-Target Matcher)
 # ========================================================================
 if cuda is not None:
