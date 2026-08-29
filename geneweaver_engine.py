@@ -162,7 +162,6 @@ def run_smith_waterman_scores(
         
     return high_scoring_sites
 # 2. CUDA Kernel Engine (Parallel Bitwise Off-Target Matcher)
-# ========================================================================
 if cuda is not None:
     @cuda.jit
     def crispr_offtarget_kernel(
