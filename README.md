@@ -149,64 +149,9 @@ The `main.py` Textual app renders a live terminal dashboard:
 - **Left Panel**: Progress bar, Dask dashboard link, and streaming log output.
 - **Right Panel**: DataTable showing each hit's genome position, the 23 bp context sequence (with **mutated bases highlighted in red**), mismatch count, and color-coded severity score.
 
----
-
-## Frequently Asked Questions
-
-### Q: Where do I place my FASTA file?
-**A:** Place it in the same directory as `main.py` (the `Final_Code_Working` folder). Then pass the filename via the `--fasta` argument.
-
-### Q: What FASTA format is supported?
-**A:** Standard multi-record FASTA. Each record starts with a `>header` line followed by lines of nucleotide characters (A, C, G, T). Example:
-```
->chr1 Homo sapiens chromosome 1
-ATGCGTGCATGCATGCATGCATGCATGCATGCATGC...
->chr2 Homo sapiens chromosome 2
-CGTACGTACGTACGTACGTACGTACGTACGTACGTA...
-```
-
-### Q: How do I get a real FASTA file to test?
-**A:** Download a chromosome FASTA file from any of these free public databases:
-- [UCSC Genome Browser](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/chromosomes/) — download `chr22.fa.gz` (~12 MB) or `chr1.fa.gz` (~70 MB, extracts to ~242 MB)
-- [NCBI Datasets](https://www.ncbi.nlm.nih.gov/datasets/genome/) — search any organism, click Download → Genomic Sequence (FASTA)
-- [Ensembl FTP](http://ftp.ensembl.org/pub/current_fasta/) — navigate to `homo_sapiens/dna/`
-
-Place the extracted `.fa` or `.fasta` file in this folder and pass it via `--fasta`.
-
-### Q: How does the genome get chunked?
-**A:** The FASTA file is read by BioPython and each chromosome sequence is split into chunks of 20 million base pairs. Each chunk overlaps the next by 22 bp so that target sites spanning chunk boundaries are not missed.
-
-### Q: What happens if I don't have a GPU?
-**A:** The pipeline will detect that CUDA is unavailable and automatically fall back to a CPU-based Dask cluster. It will still work, just slower.
-
-### Q: How does the Dask pipeline distribute work?
-**A:** Dask creates one worker per GPU. Each genomic chunk is submitted as an independent `Future`. The Dask scheduler assigns chunks to idle workers. Results stream back as they complete via `as_completed()`, which updates the TUI in real time.
-
-### Q: What is CUDA Shared Memory and why does it matter?
-**A:** Every CUDA thread block has a small, fast on-chip memory (~48 KB) called shared memory. Instead of each of the 256 threads in a block independently fetching the target sequence from slow global VRAM, we load it once into shared memory. All 256 threads then read from shared memory at near-register speed. This reduces redundant VRAM reads by 256×.
-
-### Q: How is the severity score calculated?
-**A:** A perfect match scores 100. Each mismatch deducts points based on proximity to the PAM site:
-| Position Range | Penalty | Biological Reason                |
-|----------------|---------|----------------------------------|
-| 0-10           | -1      | PAM-distal, CRISPR tolerates     |
-| 11-15          | -2      | Moderate sensitivity             |
-| 16-19          | -5      | PAM-proximal, highly sensitive   |
-
-Scores below 50 are marked **red** (critical), 50-74 are **orange** (moderate), and 75+ are **green** (low risk).
-
-### Q: What does the red highlighting in the results table mean?
-**A:** Each base pair in the 23 bp context string is compared against the expected target+PAM sequence. Any base that differs (a mismatch) is rendered in **bold red** text in the terminal. This lets you instantly see which nucleotides mutated.
-
-### Q: Can this handle the full human genome (3.2 billion bp)?
-**A:** Yes. The chunking + Dask distribution architecture is designed for exactly this. The genome is never loaded entirely into RAM. Each 20M bp chunk is processed independently on the GPU and results are streamed back. Memory usage stays bounded regardless of genome size.
-
----
-
 ## File Structure
 
-```
-Final_Code_Working/
+```text
 ├── main.py                  # Textual TUI entry point
 ├── geneweaver_final.py      # Backend engine (CUDA + Dask + BioPython)
 ├── requirements.txt         # Python dependencies
